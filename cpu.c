@@ -114,11 +114,11 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
       break;
 
     case ALU_SHL:
-      cpu->registers[regA] = (cpu->registers[regA] << regB);
+      alu_Shl(cpu, regA, regB);
       break;
 
     case ALU_SHR:
-      cpu->registers[regA] = (cpu->registers[regA] >> regB);
+      alu_Shr(cpu, regA, regB);
       break;
 
     default:
@@ -155,10 +155,6 @@ void cpu_run(struct cpu *cpu)
     unsigned char operandA = cpu_ram_read(cpu, (cpu->PC + 1));
     unsigned char operandB = cpu_ram_read(cpu, (cpu->PC + 2));
     unsigned char operands = current_inst >> 6;
-    unsigned char return_addr;
-    // unsigned char call_addr;
-    // unsigned char reg_num;
-    unsigned char temp; 
 
     // trace(cpu);
     
@@ -168,12 +164,12 @@ void cpu_run(struct cpu *cpu)
         break;
 
       case LDI:
-        inst_LDI(cpu, operandA, operandB);
+        inst_Ldi(cpu, operandA, operandB);
         cpu->PC = cpu->PC + operands + 1;
         break;
 
       case PRN:
-        inst_PRN(cpu, operandA);
+        inst_Prn(cpu, operandA);
         cpu->PC = cpu->PC + operands + 1;
         break;
 
@@ -203,10 +199,7 @@ void cpu_run(struct cpu *cpu)
         break;
 
       case CALL:
-        return_addr = cpu->PC + 2;
-        cpu->registers[SP]--;
-        cpu->ram[cpu->registers[SP]] = cpu->PC + 2;
-        cpu->PC = cpu->registers[cpu->ram[cpu->PC + 1]];
+        inst_Call(cpu);
         break;
 
       case CMP:
@@ -233,64 +226,35 @@ void cpu_run(struct cpu *cpu)
         break;
 
       case JEQ:
-        if (cpu->FL == 1) {
-          cpu->PC = cpu->registers[operandA];
-        } else {
-
-          cpu->PC = cpu->PC + operands + 1;
-        }
+        inst_Jeq(cpu, operandA, operands);
         break;
 
       case JGE:
-        if (cpu->FL == 2 || cpu->FL == 1) {
-          cpu->PC = cpu->registers[operandA];
-        } else {
-          cpu->PC = cpu->PC + operands + 1;
-        }
+        inst_Jge(cpu, operandA, operands);
         break;
 
       case JGT:
-        if (cpu->FL == 2) {
-          cpu->PC = cpu->registers[operandA];
-        } else {
-          cpu->PC = cpu->PC + operands + 1;
-        }
+        inst_Jgt(cpu, operandA, operands);
         break;
 
       case JLE:
-        if (cpu->FL == 4 || cpu->FL == 1) {
-          cpu->PC = cpu->registers[operandA];
-        } else {
-          cpu->PC = cpu->PC + operands + 1;
-        }
+        inst_Jle(cpu, operandA, operands);
         break;
 
       case JLT:
-        if (cpu->FL == 4) {
-          cpu->PC = cpu->registers[operandA];
-        } else {
-          cpu->PC = cpu->PC + operands + 1;
-        }
+        inst_Jlt(cpu, operandA, operands);
         break;
 
       case JMP:
-        cpu->PC = cpu->registers[operandA];
+        inst_Jmp(cpu, operandA);
         break;
 
       case JNE:
-        temp = cpu->FL << 7;
-        temp = temp >> 7;
-
-        if (temp == 0) {
-          cpu->PC = cpu->registers[operandA];
-        } else {
-          cpu->PC = cpu->PC + operands + 1;
-        }
+        inst_Jne(cpu, operandA, operands);
         break;
 
       case LD:
-        cpu->registers[operandA] = cpu->registers[operandB];
-        cpu->PC = cpu->PC + operands + 1;
+        inst_Ld(cpu, operandA, operandB, operands);
         break;
 
       case MOD:
@@ -313,9 +277,7 @@ void cpu_run(struct cpu *cpu)
         break;
 
       case RET:
-        return_addr = cpu->ram[cpu->registers[SP]];
-        cpu->registers[SP]++;
-        cpu->PC = return_addr;
+        inst_Ret(cpu);
         break;
 
       case SHL:

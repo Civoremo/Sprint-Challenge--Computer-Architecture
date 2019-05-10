@@ -3,12 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void inst_LDI(struct cpu *cpu, unsigned char opA, unsigned char opB)
+void inst_Ldi(struct cpu *cpu, unsigned char opA, unsigned char opB)
 {
   cpu->registers[opA] = opB;
 }
 
-void inst_PRN(struct cpu *cpu, unsigned char opA)
+void inst_Prn(struct cpu *cpu, unsigned char opA)
 {
   printf("%d\n", cpu->registers[opA]);
 }
@@ -103,4 +103,97 @@ void alu_Cmp(struct cpu *cpu, unsigned char opA, unsigned char opB)
   } else {
     cpu->FL = tempFL;
   }
+}
+
+void inst_Call(struct cpu *cpu) 
+{
+  cpu->registers[SP]--;
+  cpu->ram[cpu->registers[SP]] = cpu->PC + 2;
+  cpu->PC = cpu->registers[cpu->ram[cpu->PC + 1]];
+}
+
+void inst_Jeq(struct cpu *cpu, unsigned char opA, unsigned char operands)
+{
+  if (cpu->FL == 1) {
+    cpu->PC = cpu->registers[opA];
+  } else {
+
+    cpu->PC = cpu->PC + operands + 1;
+  }
+}
+
+void inst_Jle(struct cpu *cpu, unsigned char opA, unsigned char operands)
+{
+  if (cpu->FL == 4 || cpu->FL == 1) {
+    cpu->PC = cpu->registers[opA];
+  } else {
+    cpu->PC = cpu->PC + operands + 1;
+  }
+}
+
+void inst_Jge(struct cpu *cpu, unsigned char opA, unsigned char operands)
+{
+  if (cpu->FL == 2 || cpu->FL == 1) {
+    cpu->PC = cpu->registers[opA];
+  } else {
+    cpu->PC = cpu->PC + operands + 1;
+  }
+}
+
+void inst_Jgt(struct cpu *cpu, unsigned char opA, unsigned char operands)
+{
+  if (cpu->FL == 2) {
+    cpu->PC = cpu->registers[opA];
+  } else {
+    cpu->PC = cpu->PC + operands + 1;
+  }
+}
+
+void inst_Jlt(struct cpu *cpu, unsigned char opA, unsigned char operands)
+{
+  if (cpu->FL == 4) {
+    cpu->PC = cpu->registers[opA];
+  } else {
+    cpu->PC = cpu->PC + operands + 1;
+  }
+}
+
+void inst_Jmp(struct cpu *cpu, unsigned char opA)
+{
+  cpu->PC = cpu->registers[opA];
+}
+
+void inst_Jne(struct cpu *cpu, unsigned char opA, unsigned char operands)
+{
+  unsigned char temp = cpu->FL << 7;
+  temp = temp >> 7;
+
+  if (temp == 0) {
+    cpu->PC = cpu->registers[opA];
+  } else {
+    cpu->PC = cpu->PC + operands + 1;
+  }
+}
+
+void inst_Ld(struct cpu *cpu, unsigned char opA, unsigned char opB, unsigned char operands)
+{
+  cpu->registers[opA] = cpu->registers[opB];
+  cpu->PC = cpu->PC + operands + 1;
+}
+
+void inst_Ret(struct cpu *cpu)
+{
+  unsigned char return_addr = cpu->ram[cpu->registers[SP]];
+  cpu->registers[SP]++;
+  cpu->PC = return_addr;
+}
+
+void alu_Shl(struct cpu *cpu, unsigned char opA, unsigned char opB)
+{
+  cpu->registers[opA] = (cpu->registers[opA] << opB);
+}
+
+void alu_Shr(struct cpu *cpu, unsigned char opA, unsigned char opB)
+{
+  cpu->registers[opA] = (cpu->registers[opA] >> opB);
 }

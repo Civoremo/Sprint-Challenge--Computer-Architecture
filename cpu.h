@@ -25,18 +25,15 @@ enum alu_op {
   ALU_INC, // done
   ALU_DEC, // done
   ALU_AND, // done
-  ALU_LD,
-  ALU_JMP,
-  ALU_CMP,
-  ALU_ST,
+  ALU_CMP, // done
+  ALU_ST, // done
   ALU_OR, // done
   ALU_XOR, // done
-  ALU_SHL,
-  ALU_SHR,
+  ALU_SHL, // done
+  ALU_SHR, // done
   ALU_INT,
   ALU_MOD, // done
   ALU_NOT, // done
-  ALU_JEQ,
 };
 
 // Instructions
@@ -68,7 +65,7 @@ enum alu_op {
 #define LD   0b10000011 // X Loads registerA with the value at the memory address stored in registerB.
 #define MOD  0b10100100 // X Divide the value in the first register by the value in the second, storing the remainder of the result in registerA.
 #define MUL  0b10100010 // X Multiply the values in two registers together and store the result in registerA.
-#define NOP  0b00000000 // No operation. Do nothing for this instruction.
+#define NOP  0b00000000 // X No operation. Do nothing for this instruction.
 #define NOT  0b01101001 // X Perform a bitwise-NOT on the value in a register.
 #define OR   0b10101010 // X Perform a bitwise-OR between the values in registerA and registerB, storing the result in registerA.
 #define POP  0b01000110 // X Pop the value at the top of the stack into the given register.
